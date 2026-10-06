@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Forex Robot</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#07091a;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px}
+.robot-wrap{width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.title-main{color:#f5c842;font-size:30px;font-weight:900;letter-spacing:4px;text-align:center;margin:0 0 4px}
+.title-sub{color:#475569;font-size:13px;text-align:center;margin:0 0 30px}
+.login-box{width:100%;max-width:340px;background:#0e1228;border-radius:16px;padding:28px 20px;border:1px solid rgba(255,255,255,.07)}
+.lbox-hd{display:flex;align-items:center;gap:8px;color:#f1f5f9;font-size:15px;font-weight:600;margin-bottom:18px}
+.pwd-row{position:relative;margin-bottom:12px}
+.pwd-in{width:100%;padding:14px 46px 14px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#f1f5f9;font-size:15px;outline:none;-webkit-appearance:none;font-family:inherit}
+.pwd-in:focus{border-color:rgba(245,200,66,.5)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#475569;cursor:pointer;font-size:21px;line-height:1;padding:4px}
+.err-box{color:#ef4444;font-size:12px;margin-bottom:12px;padding:9px 12px;background:rgba(239,68,68,.1);border-radius:8px;text-align:center}
+.btn-login{width:100%;padding:14px;background:#f5c842;border:none;border-radius:10px;color:#000;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:3px;-webkit-appearance:none}
+.btn-login:active{opacity:.8}
+.warn{color:#334155;margin-top:22px;font-size:12px;text-align:center}
+
+/* HEADER */
+#header{background:#0e1228;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.h-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.h-name{color:#f5c842;font-size:15px;font-weight:900;letter-spacing:2px}
+.h-credit{color:#ef4444;font-size:8px;line-height:1.4}
+.h-sub{color:#475569;font-size:9.5px}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1.5px solid #22c55e;border-radius:20px;padding:4px 10px;flex-shrink:0}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:blink 1.4s infinite}
+.live-txt{color:#22c55e;font-weight:800;font-size:12px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* BODY */
+#body{padding:14px;padding-bottom:28px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{flex:1;padding:8px 4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#94a3b8;cursor:pointer;text-align:center;-webkit-appearance:none;transition:all .15s}
+.tab.on{background:#f5c842;border-color:#f5c842;color:#000}
+.tab .tn{font-size:11px;font-weight:700;display:block}
+.tab .ts{font-size:9px;margin-top:2px;display:block}
+
+/* Binance Status Bar */
+.ws-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;margin-bottom:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)}
+.ws-left{display:flex;align-items:center;gap:7px;font-size:11px}
+.ws-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ws-dot.green{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.ws-dot.yellow{background:#f5c842;box-shadow:0 0 6px #f5c842;animation:blink 1s infinite}
+.ws-dot.red{background:#ef4444}
+.ws-right{font-size:10px;color:#475569}
+
+/* CARD */
+.card{background:#0e1228;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+
+/* Price */
+.pstrip{display:flex;justify-content:space-between;align-items:center}
+.pv-sell{font-size:21px;color:#ef4444;font-weight:800;letter-spacing:.5px}
+.pv-buy{font-size:21px;color:#22c55e;font-weight:800;letter-spacing:.5px}
+.p-lbl{font-size:10px;color:#475569;margin-bottom:2px}
+.p-center{text-align:center}
+.p-sym{font-size:10px;color:#475569}
+.p-src{font-size:10px;font-weight:600;margin-top:3px}
+
+/* Signal */
+.sig-wrap{border-radius:14px;padding:16px;margin-bottom:12px;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);transition:all .3s}
+.sig-wrap.buy-s{border-color:#22c55e;background:rgba(22,163,74,.1)}
+.sig-wrap.sell-s{border-color:#ef4444;background:rgba(220,38,38,.1)}
+.sig-inner{display:flex;align-items:center;justify-content:space-between}
+.sig-lbl{font-size:10px;color:#475569;margin-bottom:6px}
+.sig-name{font-size:30px;font-weight:900}
+.c-buy{color:#22c55e}.c-sell{color:#ef4444}.c-wait{color:#f5c842}
+.sig-sub{font-size:11px;color:#94a3b8;margin-top:5px}
+.sig-badge{border-radius:12px;padding:13px 16px;text-align:center;min-width:66px}
+.buy-b{background:#16a34a}.sell-b{background:#dc2626}
+.b-arr{font-size:26px;color:#fff;display:block;line-height:1}
+.b-lbl{font-size:14px;font-weight:900;color:#fff;letter-spacing:1px}
+
+/* Trade */
+.tg-title{font-size:11px;color:#f5c842;font-weight:700;margin-bottom:10px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tc{background:rgba(255,255,255,.03);border-radius:8px;padding:10px}
+.tc-l{font-size:10px;color:#475569;margin-bottom:4px}
+.tc-v{font-size:14px;font-weight:700}
+
+/* MACD */
+.macd-hd{font-size:10px;color:#475569;margin-bottom:10px}
+.macd-row{display:flex;justify-content:space-around}
+.mc{text-align:center}.mc-l{font-size:10px;color:#475569;margin-bottom:3px}.mc-v{font-size:16px;font-weight:800}
+
+/* Buttons */
+.action-row{display:flex;gap:10px;margin-bottom:12px}
+.btn-buy{flex:1;padding:15px 0;background:#16a34a;border:none;border-radius:12px;color:#fff;font-size:17px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none}
+.btn-sell{flex:1;padding:15px 0;background:#dc2626;border:none;border-radius:12px;color:#fff;font-size:17px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none}
+.btn-buy:active,.btn-sell:active{opacity:.8}
+.btn-ref{width:100%;padding:14px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:12px;color:#f5c842;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;margin-bottom:12px}
+.btn-ref:active{opacity:.7}
+.btn-ref:disabled{opacity:.4;cursor:default}
+
+.spin-ic{font-size:34px;display:block;animation:spin .9s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-up{text-align:center;color:#334155;font-size:11px;margin-bottom:12px}
+.note{padding:10px 12px;background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.1);border-radius:8px;color:#475569;font-size:10px;line-height:1.6}
+
+/* Ticker pulse on new price */
+@keyframes pricePulse{0%,100%{opacity:1}50%{opacity:.3}}
+.price-flash{animation:pricePulse .4s ease}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ═══════════════════════════════ -->
+<div id="loginScreen">
+  <div class="robot-wrap">
+    <svg width="108" height="118" viewBox="0 0 100 110" fill="none">
+      <rect x="46" y="2" width="8" height="13" rx="4" fill="#64748b"/>
+      <circle cx="50" cy="2" r="5" fill="#38bdf8"/>
+      <rect x="20" y="14" width="60" height="41" rx="12" fill="#cbd5e1"/>
+      <rect x="22" y="16" width="56" height="37" rx="10" fill="#e2e8f0"/>
+      <rect x="27" y="23" width="18" height="14" rx="5" fill="#1e3a5f"/>
+      <rect x="55" y="23" width="18" height="14" rx="5" fill="#1e3a5f"/>
+      <circle cx="36" cy="30" r="6" fill="#38bdf8"/><circle cx="36" cy="30" r="2.5" fill="#fff"/>
+      <circle cx="64" cy="30" r="6" fill="#38bdf8"/><circle cx="64" cy="30" r="2.5" fill="#fff"/>
+      <path d="M37 45 Q50 53 63 45" stroke="#94a3b8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <rect x="14" y="57" width="72" height="42" rx="10" fill="#cbd5e1"/>
+      <rect x="16" y="59" width="68" height="38" rx="8" fill="#e2e8f0"/>
+      <rect x="22" y="64" width="56" height="26" rx="5" fill="#0f172a"/>
+      <rect x="27" y="69" width="28" height="4" rx="2" fill="#22c55e"/>
+      <rect x="27" y="76" width="40" height="4" rx="2" fill="#ef4444"/>
+      <rect x="27" y="83" width="34" height="4" rx="2" fill="#3b82f6"/>
+      <rect x="0" y="62" width="14" height="28" rx="7" fill="#cbd5e1"/>
+      <rect x="86" y="62" width="14" height="28" rx="7" fill="#cbd5e1"/>
+      <circle cx="7" cy="91" r="6" fill="#b4bfcc"/>
+      <circle cx="93" cy="91" r="6" fill="#b4bfcc"/>
+      <rect x="26" y="98" width="18" height="10" rx="5" fill="#cbd5e1"/>
+      <rect x="56" y="98" width="18" height="10" rx="5" fill="#cbd5e1"/>
+    </svg>
+  </div>
+  <h1 class="title-main">FOREX ROBOT</h1>
+  <p class="title-sub">Signal Bot</p>
+  <div class="login-box">
+    <div class="lbox-hd">🔐 Secure Login</div>
+    <div class="pwd-row">
+      <input class="pwd-in" id="pwdIn" type="password" placeholder="Enter password" autocomplete="off"/>
+      <button class="eye-btn" id="eyeBtn" onclick="toggleEye()">👁️</button>
+    </div>
+    <div class="err-box hidden" id="errBox"></div>
+    <button class="btn-login" onclick="tryLogin()">LOGIN</button>
+  </div>
+  <p class="warn">⚠️ Unauthorized access is prohibited</p>
+</div>
+
+<!-- ══ MAIN ════════════════════════════════ -->
+<div id="mainScreen" class="hidden">
+
+  <div id="header">
+    <div class="h-icon">
+      <svg width="34" height="38" viewBox="0 0 100 110" fill="none">
+        <circle cx="50" cy="2" r="4" fill="#38bdf8"/>
+        <rect x="20" y="8" width="60" height="42" rx="12" fill="#cbd5e1"/>
+        <rect x="22" y="10" width="56" height="38" rx="10" fill="#e2e8f0"/>
+        <rect x="27" y="18" width="16" height="13" rx="4" fill="#1e3a5f"/>
+        <rect x="57" y="18" width="16" height="13" rx="4" fill="#1e3a5f"/>
+        <circle cx="35" cy="25" r="5" fill="#38bdf8"/><circle cx="35" cy="25" r="2" fill="#fff"/>
+        <circle cx="65" cy="25" r="5" fill="#38bdf8"/><circle cx="65" cy="25" r="2" fill="#fff"/>
+        <rect x="16" y="52" width="68" height="40" rx="10" fill="#e2e8f0"/>
+        <rect x="22" y="57" width="56" height="26" rx="5" fill="#0f172a"/>
+        <rect x="27" y="62" width="24" height="4" rx="2" fill="#22c55e"/>
+        <rect x="27" y="69" width="38" height="4" rx="2" fill="#ef4444"/>
+        <rect x="27" y="76" width="30" height="4" rx="2" fill="#3b82f6"/>
+      </svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="h-name">FOREX ROBOT</div>
+      <div class="h-credit">Build Forex Robot Chart Analyzer By Amin Agha Hamidi in 24/09/2026</div>
+      <div class="h-sub">Signal Bot</div>
+    </div>
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      <span class="live-txt">LIVE</span>
+    </div>
+  </div>
+
+  <div id="body">
+
+    <div class="tabs">
+      <button class="tab on" onclick="pickSym('XAUUSD.m',this)">
+        <span class="tn">XAUUSD</span><span class="ts" id="t0">—</span>
+      </button>
+      <button class="tab" onclick="pickSym('JP225.std',this)">
+        <span class="tn">JP225</span><span class="ts" id="t1">—</span>
+      </button>
+      <button class="tab" onclick="pickSym('BTCUSD.m',this)">
+        <span class="tn">BTCUSD</span><span class="ts" id="t2">—</span>
+      </button>
+    </div>
+
+    <!-- Binance WebSocket status bar -->
+    <div class="ws-bar">
+      <div class="ws-left">
+        <div class="ws-dot yellow" id="wsDot"></div>
+        <span id="wsLabel" style="color:#94a3b8">Connecting to Binance...</span>
+      </div>
+      <div class="ws-right" id="wsTick">—</div>
+    </div>
+
+    <!-- Price strip -->
+    <div class="card">
+      <div class="pstrip">
+        <div>
+          <div class="p-lbl">SELL / BID</div>
+          <div class="pv-sell" id="pBid">—</div>
+        </div>
+        <div class="p-center">
+          <div class="p-sym" id="pSym">XAUUSD.m</div>
+          <div class="p-src" id="pSrc" style="color:#475569">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="p-lbl">BUY / ASK</div>
+          <div class="pv-buy" id="pAsk">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="card" id="loadDiv" style="text-align:center;padding:44px 0">
+      <span class="spin-ic">⚙️</span>
+      <div style="font-size:13px;color:#94a3b8">Analyzing MACD signal...</div>
+    </div>
+
+    <!-- Signal card -->
+    <div class="sig-wrap hidden" id="sigCard">
+      <div class="sig-inner">
+        <div>
+          <div class="sig-lbl">MACD (12, 26, 9) Crossover Signal</div>
+          <div class="sig-name c-wait" id="sigTxt">WAIT</div>
+          <div class="sig-sub" id="sigSub">Watching for crossover</div>
+        </div>
+        <div class="sig-badge buy-b hidden" id="sigBadge">
+          <span class="b-arr" id="sigArr">↑</span>
+          <span class="b-lbl" id="sigBL">BUY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trade setup -->
+    <div class="card hidden" id="tradeCard">
+      <div class="tg-title">📊 Trade setup — TP:SL = 1:3</div>
+      <div class="tgrid">
+        <div class="tc"><div class="tc-l">Entry price</div><div class="tc-v" id="tvE" style="color:#f1f5f9">—</div></div>
+        <div class="tc"><div class="tc-l">Take Profit (1:3)</div><div class="tc-v" id="tvT" style="color:#22c55e">—</div></div>
+        <div class="tc"><div class="tc-l">Stop Loss</div><div class="tc-v" id="tvS" style="color:#ef4444">—</div></div>
+        <div class="tc"><div class="tc-l">Risk : Reward</div><div class="tc-v" style="color:#f5c842">1 : 3</div></div>
+      </div>
+    </div>
+
+    <!-- MACD values -->
+    <div class="card hidden" id="macdCard">
+      <div class="macd-hd">MACD (12, 26, close, 9 EMA EMA)</div>
+      <div class="macd-row">
+        <div class="mc"><div class="mc-l">MACD</div><div class="mc-v" id="mvM" style="color:#38bdf8">—</div></div>
+        <div class="mc"><div class="mc-l">Signal</div><div class="mc-v" id="mvS" style="color:#f97316">—</div></div>
+        <div class="mc"><div class="mc-l">Histogram</div><div class="mc-v" id="mvH">—</div></div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button class="btn-buy">BUY <span style="font-size:22px">▲</span></button>
+      <button class="btn-sell">SELL <span style="font-size:22px">▼</span></button>
+    </div>
+
+    <button class="btn-ref" id="refBtn" onclick="doRefresh()">🔄 Refresh signal</button>
+
+    <div class="last-up hidden" id="lastUp"></div>
+
+    <div class="note">
+      🟢 BTCUSD — Binance WebSocket real-time data<br>
+      🟡 XAUUSD — Binance PAXG/USDT approximate gold price<br>
+      🔵 JP225 — Smart simulation (MACD analysis)<br>
+      ⚠️ Signals are for analysis only. Trading involves risk.
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════════
+const PWD = "Hamidi2026@#AK";
+
+const SYMS = {
+  "XAUUSD.m":  { dig:2,  spread:0.40, atrMul:3.0,
+                 binancePair:"PAXGUSDT", binanceDiv:1 },     // PAXG ≈ 1 troy oz gold
+  "JP225.std": { dig:0,  spread:10,   atrMul:3.0,
+                 binancePair:null,     base:37480, vol:0.0032 },
+  "BTCUSD.m":  { dig:2,  spread:18,   atrMul:3.0,
+                 binancePair:"BTCUSDT", binanceDiv:1 },
+};
+
+const BINANCE_REST = "https://api.binance.com/api/v3/klines";
+const BINANCE_WS   = "wss://stream.binance.com:9443/stream?streams=";
+
+// ══════════════════════════════════════════════════
+//  MACD ENGINE
+// ══════════════════════════════════════════════════
+function ema(d, p) {
+  const k = 2/(p+1), r = new Array(d.length).fill(null);
+  if(d.length < p) return r;
+  let s = 0;
+  for(let i=0;i<p;i++) s+=d[i];
+  r[p-1]=s/p;
+  for(let i=p;i<d.length;i++) r[i]=d[i]*k+r[i-1]*(1-k);
+  return r;
+}
+function macd(c){
+  const ef=ema(c,12), es=ema(c,26);
+  const ml=c.map((_,i)=>ef[i]!=null&&es[i]!=null?ef[i]-es[i]:null);
+  const si=ml.findIndex(v=>v!=null);
+  if(si<0) return{ml,sl:ml.slice(),h:ml.slice()};
+  const vm=ml.slice(si).filter(v=>v!=null);
+  const se=ema(vm,9);
+  const sl=new Array(c.length).fill(null);
+  se.forEach((v,i)=>{sl[si+i]=v;});
+  const h=c.map((_,i)=>ml[i]!=null&&sl[i]!=null?ml[i]-sl[i]:null);
+  return{ml,sl,h};
+}
+function crossover(ml,sl){
+  const p=[];
+  for(let i=0;i<ml.length;i++) if(ml[i]!=null&&sl[i]!=null) p.push([ml[i],sl[i]]);
+  if(p.length<3) return "WAIT";
+  const[pm,ps]=p[p.length-2],[cm,cs]=p[p.length-1];
+  if(pm<ps&&cm>cs) return "BUY";
+  if(pm>ps&&cm<cs) return "SELL";
+  return cm>cs?"HOLD_BUY":"HOLD_SELL";
+}
+function buildResult(closes, spread, dig, atrMul){
+  const{ml,sl,h}=macd(closes);
+  const sig=crossover(ml,sl);
+  let lm=null,ls=null,lh=null;
+  for(let i=ml.length-1;i>=0;i--){
+    if(ml[i]!=null&&sl[i]!=null){lm=ml[i];ls=sl[i];lh=h[i];break;}
+  }
+  const price=closes[closes.length-1];
+  const atr=closes.slice(-14).reduce((a,b,i,arr)=>
+    i>0?a+Math.abs(b-arr[i-1]):0,0)/13||price*0.003;
+  let en=null,slv=null,tp=null;
+  if(sig==="BUY") {en=price+spread;slv=en-atr;tp=en+atr*atrMul;}
+  if(sig==="SELL"){en=price;      slv=en+atr;tp=en-atr*atrMul;}
+  return{sig,bid:price.toFixed(dig),ask:(price+spread).toFixed(dig),
+    entry:en?.toFixed(dig),sl:slv?.toFixed(dig),tp:tp?.toFixed(dig),
+    macd:lm,macdSig:ls,hist:lh};
+}
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let curSym   = "XAUUSD.m";
+let allData  = {};          // sym → result
+let candles  = {};          // sym → float[]  (close prices)
+let wsConn   = null;
+let wsReady  = false;
+let busy     = false;
+let autoTmr  = null;
+
+// ══════════════════════════════════════════════════
+//  SIMULATION (for JP225 + fallback)
+// ══════════════════════════════════════════════════
+function simCloses(base, vol, n=300){
+  const c=[base];
+  for(let i=1;i<n;i++){
+    const p=(Math.random()-.485)*vol;
+    c.push(Math.max(c[i-1]*(1+p),base*.8));
+  }
+  return c;
+}
+
+// ══════════════════════════════════════════════════
+//  BINANCE REST — fetch 200 candles
+// ══════════════════════════════════════════════════
+async function fetchCandles(pair){
+  const url=`${BINANCE_REST}?symbol=${pair}&interval=1m&limit=200`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("Binance REST "+res.status);
+  const raw=await res.json();
+  return raw.map(k=>parseFloat(k[4]));   // close prices
+}
+
+// ══════════════════════════════════════════════════
+//  BINANCE WEBSOCKET — combined stream
+// ══════════════════════════════════════════════════
+function startBinanceWS(){
+  setWS("yellow","Connecting to Binance...");
+  const streams="btcusdt@kline_1m/paxgusdt@kline_1m";
+  wsConn=new WebSocket(BINANCE_WS+streams);
+
+  wsConn.onopen=()=>{
+    wsReady=true;
+    setWS("green","Binance WebSocket live");
+  };
+  wsConn.onmessage=(ev)=>{
+    try{
+      const msg=JSON.parse(ev.data);
+      if(!msg.data||msg.data.e!=="kline") return;
+      const k=msg.data.k;
+      const sym=k.s;                        // "BTCUSDT" or "PAXGUSDT"
+      const close=parseFloat(k.c);
+      const closed=k.x;                     // candle is finished?
+
+      // Match to app symbol
+      let appSym=null;
+      if(sym==="BTCUSDT")  appSym="BTCUSD.m";
+      if(sym==="PAXGUSDT") appSym="XAUUSD.m";
+      if(!appSym) return;
+
+      const cfg=SYMS[appSym];
+      if(!candles[appSym]||!candles[appSym].length) return;
+
+      if(closed){
+        candles[appSym].push(close);
+        if(candles[appSym].length>300) candles[appSym].shift();
+      } else {
+        candles[appSym][candles[appSym].length-1]=close;
+      }
+
+      // Recalculate signal
+      const r=buildResult(candles[appSym],cfg.spread,cfg.dig,cfg.atrMul);
+      r.src="Binance";
+      allData[appSym]=r;
+
+      // Tick display
+      el("wsTick").textContent=sym.replace("USDT","")+" "+close.toFixed(2);
+
+      // If this is the active symbol, update UI without full reload
+      if(appSym===curSym) renderSym(appSym);
+      updateTabs();
+      showTime();
+    }catch(e){}
+  };
+  wsConn.onclose=()=>{
+    wsReady=false;
+    setWS("red","Disconnected — reconnecting...");
+    setTimeout(startBinanceWS,4000);
+  };
+  wsConn.onerror=()=>{
+    wsConn.close();
+  };
+}
+
+// ══════════════════════════════════════════════════
+//  INIT ALL DATA
+// ══════════════════════════════════════════════════
+async function initAll(){
+  busy=true; refBtn(true);
+  show("loadDiv"); hide("sigCard"); hide("tradeCard"); hide("macdCard");
+
+  await Promise.all(Object.entries(SYMS).map(async([sym,cfg])=>{
+    try{
+      let closes;
+      if(cfg.binancePair){
+        closes=await fetchCandles(cfg.binancePair);
+        candles[sym]=[...closes];
+        const r=buildResult(closes,cfg.spread,cfg.dig,cfg.atrMul);
+        r.src="Binance";
+        allData[sym]=r;
+      } else {
+        closes=simCloses(cfg.base,cfg.vol);
+        candles[sym]=[...closes];
+        const r=buildResult(closes,cfg.spread,cfg.dig,cfg.atrMul);
+        r.src="SIM";
+        allData[sym]=r;
+      }
+    }catch(e){
+      // Fallback
+      const cfg2=SYMS[sym];
+      const base=cfg2.base||83000, vol=cfg2.vol||0.004;
+      const closes=simCloses(base,vol);
+      candles[sym]=[...closes];
+      const r=buildResult(closes,cfg2.spread,cfg2.dig,cfg2.atrMul);
+      r.src="SIM";
+      allData[sym]=r;
+    }
+  }));
+
+  hide("loadDiv");
+  updateTabs();
+  renderSym(curSym);
+  showTime();
+  busy=false; refBtn(false);
+  startBinanceWS();
+}
+
+// ══════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════
+function renderSym(sym){
+  const d=allData[sym]; if(!d) return;
+  const isBuy=d.sig==="BUY", isSell=d.sig==="SELL", active=isBuy||isSell;
+
+  el("pSym").textContent=sym;
+  el("pBid").textContent=d.bid||"—";
+  el("pAsk").textContent=d.ask||"—";
+  el("pSrc").textContent=d.src==="Binance"?"🟢 Binance Real":"🔵 Simulation";
+  el("pSrc").style.color=d.src==="Binance"?"#22c55e":"#f5c842";
+
+  show("sigCard");
+  el("sigCard").className="sig-wrap"+(isBuy?" buy-s":isSell?" sell-s":"");
+  const sn=el("sigTxt");
+  sn.textContent=isBuy?"BUY":isSell?"SELL":"WAIT";
+  sn.className="sig-name "+(isBuy?"c-buy":isSell?"c-sell":"c-wait");
+  el("sigSub").textContent=active
+    ?"MACD crossover detected ✓"
+    :(d.sig==="HOLD_BUY"?"▲ Bullish — waiting for crossover":"▼ Bearish — waiting for crossover");
+
+  const badge=el("sigBadge");
+  if(active){
+    show_el(badge);
+    badge.className="sig-badge "+(isBuy?"buy-b":"sell-b");
+    el("sigArr").textContent=isBuy?"↑":"↓";
+    el("sigBL").textContent=isBuy?"BUY":"SELL";
+  } else hide_el(badge);
+
+  if(active){
+    show("tradeCard");
+    el("tvE").textContent=d.entry||"—";
+    el("tvT").textContent=d.tp||"—";
+    el("tvS").textContent=d.sl||"—";
+  } else hide("tradeCard");
+
+  show("macdCard");
+  const f2=v=>v!=null?parseFloat(v).toFixed(2):"—";
+  el("mvM").textContent=f2(d.macd);
+  el("mvS").textContent=f2(d.macdSig);
+  el("mvH").textContent=f2(d.hist);
+  el("mvH").style.color=parseFloat(d.hist)>=0?"#22c55e":"#ef4444";
+}
+
+function updateTabs(){
+  ["XAUUSD.m","JP225.std","BTCUSD.m"].forEach((sym,i)=>{
+    const d=allData[sym], e=el("t"+i);
+    if(!d){e.textContent="—";e.style.color="";return;}
+    e.textContent=d.sig==="BUY"?"▲ BUY":d.sig==="SELL"?"▼ SELL":"WAIT";
+    e.style.color=d.sig==="BUY"?"#22c55e":d.sig==="SELL"?"#ef4444":"#94a3b8";
+  });
+}
+
+function showTime(){
+  const e=el("lastUp");e.classList.remove("hidden");
+  e.textContent="Last update: "+new Date().toLocaleTimeString();
+}
+
+function setWS(color,txt){
+  const dot=el("wsDot");
+  dot.className="ws-dot "+color;
+  el("wsLabel").textContent=txt;
+  el("wsLabel").style.color=color==="green"?"#22c55e":color==="yellow"?"#f5c842":"#ef4444";
+}
+
+// ══════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════
+const el=id=>document.getElementById(id);
+const show=id=>el(id).classList.remove("hidden");
+const hide=id=>el(id).classList.add("hidden");
+const show_el=e=>e.classList.remove("hidden");
+const hide_el=e=>e.classList.add("hidden");
+const refBtn=d=>{const b=el("refBtn");b.disabled=d;b.textContent=d?"⚙️ Analyzing...":"🔄 Refresh signal";};
+
+// ══════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════
+let eyeOn=false;
+function toggleEye(){
+  eyeOn=!eyeOn;
+  el("pwdIn").type=eyeOn?"text":"password";
+  el("eyeBtn").textContent=eyeOn?"🙈":"👁️";
+}
+el("pwdIn").addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin();});
+
+function tryLogin(){
+  const v=el("pwdIn").value;
+  if(v===PWD){
+    hide("loginScreen");show("mainScreen");
+    initAll();
+    autoTmr=setInterval(()=>{
+      // JP225 refreshes every 60s (simulation)
+      const cfg=SYMS["JP225.std"];
+      const c=simCloses(cfg.base,cfg.vol);
+      candles["JP225.std"]=[...c];
+      const r=buildResult(c,cfg.spread,cfg.dig,cfg.atrMul);
+      r.src="SIM";
+      allData["JP225.std"]=r;
+      updateTabs();
+      if(curSym==="JP225.std") renderSym("JP225.std");
+    },60000);
+  } else {
+    const eb=el("errBox");
+    eb.classList.remove("hidden");
+    eb.textContent="Incorrect password. Access denied.";
+    setTimeout(()=>eb.classList.add("hidden"),3000);
+    el("pwdIn").value="";
+  }
+}
+function pickSym(sym,btn){
+  curSym=sym;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  if(allData[sym]) renderSym(sym);
+}
+function doRefresh(){
+  if(busy) return;
+  if(wsConn) wsConn.close();
+  initAll();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+-keep class com.hamidi.forexrobot.** { *; }
+-dontwarn okhttp3.**
